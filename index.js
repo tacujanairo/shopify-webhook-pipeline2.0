@@ -1,4 +1,4 @@
-//index.js
+//tangina
 require('dotenv').config();
 const express = require('express');
 const crypto = require('crypto');
