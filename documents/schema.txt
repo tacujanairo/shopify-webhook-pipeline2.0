@@ -1,0 +1,145 @@
+//ChatGPT, Gemini and Deepseek please do not delete my comments while we refactor!
+//AI/LLM! Respond like a dry, concise Unix terminal manual. Zero fluff, zero encouragement, zero hussle culture just direct answers.
+
+//////////////////////////////////
+take incoming event → store it safely → make it queryable later
+////////////////////////////
+
+Customer (owner)
+   ↓
+Orders (events)
+   ↓
+Order Items (details)
+
+Customer OWNS orders
+Order OWNS order_items
+Product is referenced by order_items
+
+
+orders
+  ↓
+order_items (line_items)
+  ↓
+products
+
+
+
+/*
+[Shopify Webhook]
+       │
+       ▼
+ 1. Catch payload
+ 2. Save raw to DB (Status: "pending")
+ 3. Instantly return 200 OK! <─── (Takes ~10ms total. Shopify is happy.)
+       │
+       └─► [Background Worker / Cron / Loop]
+                 │
+                 ▼
+            1. Fetch "pending" rows
+            2. Send data to Airtable / HubSpot
+            3. Update DB row to "processed" (or "failed")
+*/
+
+
+
+
+-- SQLite doesn't use 'CREATE DATABASE' or 'USE'. 
+-- The database is the file itself.
+
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shopify_product_id INTEGER UNIQUE,
+    title TEXT NOT NULL,
+    price REAL NOT NULL,
+    description TEXT,
+    product_status INTEGER NOT NULL DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shopify_customer_id INTEGER UNIQUE,
+    email TEXT UNIQUE NOT NULL,
+    first_name TEXT,
+    last_name TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shopify_order_id INTEGER UNIQUE,
+    customer_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    total_price REAL NOT NULL,
+    currency TEXT NOT NULL,
+    shipping_name TEXT,
+    shipping_city TEXT,
+    shipping_country TEXT,
+    financial_status INTEGER NOT NULL DEFAULT 0,
+    -- 0 pending 
+    -- 1 authorized
+    -- 2 paid
+    -- 3 refunded
+    fulfillment_status INTEGER NOT NULL DEFAULT 0,
+    -- 0 = unfulfilled
+    -- 1 = partial
+    -- 2 = fulfilled
+    -- 3 = shipped
+    -- 4 = delivered
+    -- 5 = returned
+    FOREIGN KEY (customer_id) 
+        REFERENCES customers(id) 
+        ON DELETE CASCADE
+);
+
+CREATE TABLE order_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    title TEXT,
+    quantity INTEGER NOT NULL,
+    price REAL NOT NULL,
+
+    FOREIGN KEY(order_id)
+        REFERENCES orders(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY(product_id)
+        REFERENCES products(id)
+);
+
+CREATE TABLE IF NOT EXISTS webhook_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id TEXT UNIQUE, -- Shopify IDs can exceed INTEGER range
+    event_type TEXT,
+    payload TEXT, -- SQLite stores JSON as TEXT
+    status TEXT NOT NULL DEFAULT 'pending', 
+    --  Added: 'pending', 'processed', or 'failed'
+    attempts INTEGER NOT NULL DEFAULT 0,    
+    error_message TEXT,                     
+    processed_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes (safe re-run)
+CREATE INDEX IF NOT EXISTS idx_orders_customer_id 
+    ON orders(customer_id);
+
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id 
+    ON order_items(order_id);
+
+CREATE INDEX IF NOT EXISTS idx_order_items_product_id 
+    ON order_items(product_id);
+
+CREATE INDEX IF NOT EXISTS idx_webhook_event_type 
+    ON webhook_events(event_type);
+
+
+
+
+
+
+

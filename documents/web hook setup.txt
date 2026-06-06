@@ -1,0 +1,129 @@
+domain name should be pinting towards the server!!!
+
+
+sudo apt update && sudo apt upgrade -y
+
+allow port 3000 on the vps firewall
+
+Accept	TCP: 443	0.0.0.0/0	High	-	
+Accept	TCP: 80		0.0.0.0/0	High	-	
+Accept	TCP: 22		0.0.0.0/0	High	-	
+Accept	TCP: 3000	0.0.0.0/0	High	-
+
+
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+
+sudo apt update
+sudo apt install nginx -y
+
+
+mkdir ~/webhook-app
+cd ~/webhook-app
+nano index.js
+
+"
+const http = require("http");
+const PORT = 3000;
+
+const server = http.createServer((req, res) => {
+    if (req.method === "POST" && req.url === "/webhook") {
+        let body = "";
+        req.on("data", (chunk) => {
+            body += chunk.toString();
+        });
+        req.on("end", () => {
+            try {
+                const data = JSON.parse(body);
+                const normalized = normalizeShopifyOrder(data);
+                sendToAirtable(normalized);
+                sendToHubSpot(normalized);
+                res.end("OK");
+            } catch (e) {
+                res.statusCode = 400;
+                res.end("Invalid JSON");
+            }
+        });
+    } else {
+        res.end("Server running");
+    }
+});
+
+function normalizeShopifyOrder(data) {
+    return {
+        id: data.id,
+        email: data.email,
+        total: data.total_price,
+        created_at: data.created_at
+    };
+}
+
+function sendToAirtable(data) {
+    console.log("📦 Sending to Airtable...");
+    console.log(data);
+}
+
+function sendToHubSpot(data) {
+    console.log("📇 Sending to HubSpot...");
+    console.log(data);
+}
+
+server.listen(PORT, () => {
+    console.log(`Listening on ${PORT}`);
+});
+
+"
+
+
+node index.js
+
+
+-> fThe Local "Self-Talk" Test from the server termina.
+
+curl -X POST http://localhost:3000/webhook \
+  -H "Content-Type: application/json" \
+  -d '{"id": 999, "email": "potato@surfercloud.com", "total_price": "1.99", "created_at": "2026-04-28"}'
+
+
+
+sudo nano /etc/nginx/sites-available/api-webhook
+
+"
+server {
+    listen 80;
+    server_name api.airotacujan.online;
+
+    location /webhook {
+        proxy_pass http://127.0.0.1:3000/webhook;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location / {
+        return 200 "Nginx is working 🚀";
+    }
+}
+"
+We need to tell Nginx to actually use that file.
+
+sudo ln -s /etc/nginx/sites-available/api-webhook /etc/nginx/sites-enabled/
+
+sudo nginx -t
+
+sudo systemctl restart nginx
+
+curl -X POST http://api.airotacujan.online/webhook \
+  -H "Content-Type: application/json" \
+  -d '{"id": 888, "email": "success@airotacujan.online", "total_price": "0.00", "created_at": "2026-04-30"}'
+
+curl -X POST http://api.airotacujan.online/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 123,
+    "email": "test@example.com",
+    "total_price": "99.99",
+    "created_at": "2026-04-28"
+}'
