@@ -99,7 +99,7 @@ async function sendToAirtable(data) {
                         "Order ID": String(data.id),
                         "Email": data.email,
                         "Total Price": parseFloat(data.total),
-                        "Order Date": data.created_at,
+                        //"Order Date": data.created_at,
                         "Customer Name": data.customer_name || "Unknown",
                         "Status": data.order_status || "pending"
                     }
