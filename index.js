@@ -1,4 +1,4 @@
-//latest
+//2026-06-07
 require('dotenv').config();
 const express = require('express');
 const crypto = require('crypto');
@@ -85,7 +85,7 @@ async function sendToAirtable(data) {
     try {
         console.log("📦 [Express] Sending to Airtable...");
 
-        const AIRTABLE_API_URL = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Table%201`;
+        const AIRTABLE_API_URL = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/orders`;
 
         const response = await fetch(AIRTABLE_API_URL, {
             method: 'POST',
