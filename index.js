@@ -7,14 +7,14 @@ const Airtable = require('airtable');
 const app = express();
 const PORT = 3000;
 const SHOPIFY_SECRET = process.env.SHOPIFY_SECRET;
-
+/////////////////dead code//////////////////////////
 // Configure Airtable
 const airtable = new Airtable({
     apiKey: process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN
 });
 
 const base = airtable.base(process.env.AIRTABLE_BASE_ID);
-
+//////////////////////dead code///////////////////////
 // CRITICAL MIDDLEWARE: Captures the untouched raw body buffer before Express parses it.
 app.use(express.json({
     verify: (req, res, buf) => {
@@ -100,6 +100,7 @@ async function sendToAirtable(data) {
                         "Email": data.email,
                         "Total Price": parseFloat(data.total),
                         //"Order Date": data.created_at,
+                        "Order Date": "Palaka",
                         "Customer Name": data.customer_name || "Unknown",
                         "Status": data.order_status || "pending"
                     }
