@@ -69,7 +69,7 @@ app.post('/webhook', async (req, res) => {
 app.get('/', (req, res) => {
     res.send("Express Server running inside Docker space 🚀");
 });
-
+/*
 function normalizeShopifyOrder(data) {
     return {
         id: data.id,
@@ -80,7 +80,36 @@ function normalizeShopifyOrder(data) {
         order_status: data.fulfillment_status || 'pending'
     };
 }
+*/
+function normalizeShopifyOrder(data) {
+    return {
+        // Order Meta
+        id: String(data.id),
+        order_number: data.name, // e.g., "#1024"
+        total: parseFloat(data.total_price),
+        created_at: new Date(data.created_at).toISOString(),
+        financial_status: data.financial_status || 'pending',
+        fulfillment_status: data.fulfillment_status || 'unfulfilled',
 
+        // Customer Meta
+        customer: {
+            id: String(data.customer?.id),
+            email: data.email || data.customer?.email,
+            first_name: data.customer?.first_name || 'Guest',
+            last_name: data.customer?.last_name || 'Customer'
+        },
+
+        // Array of products inside this specific order
+        line_items: data.line_items.map(item => ({
+            id: String(item.id),
+            sku: item.sku || `NO-SKU-${item.product_id}`,
+            title: item.title,
+            variant_title: item.variant_title,
+            quantity: parseInt(item.quantity, 10),
+            price: parseFloat(item.price)
+        }))
+    };
+}
 async function sendToAirtable(data) {
     try {
         console.log("📦 [Express] Sending to Airtable...");

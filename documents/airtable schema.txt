@@ -1,0 +1,53 @@
+- Customers Table
+
+    Customer ID(# Number) 	
+    First Name(A single text line) 	
+    Last Name(A single text line) 	
+    Email(email) 	
+    Phone(phone) 	
+    Orders(Link to Orders Table) 
+    Lifetime Value (Currency)
+
+- Orders Table
+
+    Order ID(# Number) 
+    Customer(Link to Customers Table) 
+    Order Date(date/time) 
+    Financial Status(Single Select)
+     - pending
+     - authorized
+     - partially_paid
+     - paid
+     - partially_refunded
+     - refunded
+     - voided	
+    Fulfillment Status
+     - null
+     - partial
+     - fulfilled
+    Line Items(Link to Line Items Table)
+    Total Price(Currency)
+
+- Line Items Table
+
+    Line Item ID(# Number)
+    Order Link(Link to Orders Table) 
+    Product Link(Link to Products Table) 
+    Quantity(# Number)
+    Price Per Unit(Currency)
+    Total Line Price(Currency)
+
+
+- Products Table
+
+    SKU(# Number)
+    Product Title(A single text line) 
+    Unit Cost(Currency)
+    Line Items(Link to Line Items Table) 
+    Total Units Sold(# Number) 
+
+
+
+
+
+
