@@ -10,7 +10,7 @@
 
 - Orders Table
 
-    Order ID(# Number) 
+    Order ID(A single text line) 
     Customer(Link to Customers Table) 
     Order Date(date/time) 
     Financial Status(Single Select)
@@ -30,7 +30,7 @@
 
 - Line Items Table
 
-    Line Item ID(# Number)
+    Line Item ID(A single text line)
     Order Link(Link to Orders Table) 
     Product Link(Link to Products Table) 
     Quantity(# Number)
@@ -40,7 +40,7 @@
 
 - Products Table
 
-    SKU(# Number)
+    SKU(A single text line)
     Product Title(A single text line) 
     Unit Cost(Currency)
     Line Items(Link to Line Items Table) 

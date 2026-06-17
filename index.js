@@ -111,53 +111,16 @@ function normalizeShopifyOrder(data) {
     };
 }
 /*
-async function sendToAirtable(data) {
-    try {
-        console.log("📦 [Express] Sending to Airtable...");
+Upsert Products: Create or find the items to get their Airtable Record IDs.
 
-        const AIRTABLE_API_URL = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Orders`;
+Upsert Customer: Create or find the customer profile to get their Airtable Record ID.
 
-        const response = await fetch(AIRTABLE_API_URL, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                records: [{
-                    fields: {
-                        "Order ID": String(data.id),
-                        //"Customer": data.customer_name || "Unknown",
-                        "Order Date": new Date(data.created_at).toISOString(),
-                        "Financial Status": data.order_status || "voided",
-                        "Fulfillment Status": data.order_status || "null",
-                        "Total Price": 99.99
-                        //"Email": data.email,
-                        //"Total Price": parseFloat(data.total),
-                        //"Order Date": data.created_at,
+Create Order: Create the Order, linking the Customer's Record ID. Get the new Order's Record ID.
 
-
-                    }
-                }]
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            console.error("Airtable error:", result);
-            throw new Error(result.error?.message || "Airtable error");
-        }
-
-        console.log("✅ Successfully sent to Airtable! Record ID:", result.records[0].id);
-
-    } catch (error) {
-        console.error("❌ Error sending to Airtable:", error.message);
-        throw error;
-    }
-}
+Create Line Items: Create a separate record for every product in the cart, linking them directly to both the Order's Record ID and the Product's Record ID.
 */
 async function sendToAirtable(data) {
+
     try {
         console.log("📦 [Express] Sending to Airtable...");
 
@@ -174,6 +137,7 @@ async function sendToAirtable(data) {
                     fields: {
                       "Order ID": String(data.id),
                       //"Customer": data.customer_name || "Unknown",
+                      "Customer": "Palaka",
                       "Order Date": new Date(data.created_at).toISOString(),
                       "Financial Status": data.order_status || "voided",
                       "Fulfillment Status": data.order_status || "null",
