@@ -114,7 +114,7 @@ async function sendToAirtable(data) {
     try {
         console.log("📦 [Express] Sending to Airtable...");
 
-        const AIRTABLE_API_URL = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/orders`;
+        const AIRTABLE_API_URL = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Orders`;
 
         const response = await fetch(AIRTABLE_API_URL, {
             method: 'POST',
@@ -126,12 +126,16 @@ async function sendToAirtable(data) {
                 records: [{
                     fields: {
                         "Order ID": String(data.id),
-                        "Email": data.email,
-                        "Total Price": parseFloat(data.total),
-                        //"Order Date": data.created_at,
+                        "Customer": data.customer_name || "Unknown",
                         "Order Date": new Date(data.created_at).toISOString(),
-                        "Customer Name": data.customer_name || "Unknown",
-                        "Status": data.order_status || "pending"
+                        "Financial Status": data.order_status || "voided",
+                        "Fulfillment Status": data.order_status || "null",
+                        "Total Price": 99.99
+                        //"Email": data.email,
+                        //"Total Price": parseFloat(data.total),
+                        //"Order Date": data.created_at,
+
+
                     }
                 }]
             })
