@@ -110,6 +110,7 @@ function normalizeShopifyOrder(data) {
         }))
     };
 }
+/*
 async function sendToAirtable(data) {
     try {
         console.log("📦 [Express] Sending to Airtable...");
@@ -136,6 +137,47 @@ async function sendToAirtable(data) {
                         //"Order Date": data.created_at,
 
 
+                    }
+                }]
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            console.error("Airtable error:", result);
+            throw new Error(result.error?.message || "Airtable error");
+        }
+
+        console.log("✅ Successfully sent to Airtable! Record ID:", result.records[0].id);
+
+    } catch (error) {
+        console.error("❌ Error sending to Airtable:", error.message);
+        throw error;
+    }
+}
+*/
+async function sendToAirtable(data) {
+    try {
+        console.log("📦 [Express] Sending to Airtable...");
+
+        const AIRTABLE_API_URL = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Orders`; // Make sure table name matches your actual layout case
+
+        const response = await fetch(AIRTABLE_API_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                records: [{
+                    fields: {
+                      "Order ID": String(data.id),
+                      //"Customer": data.customer_name || "Unknown",
+                      "Order Date": new Date(data.created_at).toISOString(),
+                      "Financial Status": data.order_status || "voided",
+                      "Fulfillment Status": data.order_status || "null",
+                      "Total Price": 99.99
                     }
                 }]
             })
