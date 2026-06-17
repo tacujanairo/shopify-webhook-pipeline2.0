@@ -126,7 +126,7 @@ async function sendToAirtable(data) {
                 records: [{
                     fields: {
                         "Order ID": String(data.id),
-                        "Customer": data.customer_name || "Unknown",
+                        //"Customer": data.customer_name || "Unknown",
                         "Order Date": new Date(data.created_at).toISOString(),
                         "Financial Status": data.order_status || "voided",
                         "Fulfillment Status": data.order_status || "null",
